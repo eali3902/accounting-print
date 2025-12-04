@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الطباعة - المحاسبة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .print-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #2c5f2d, #1e3a28);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 4px solid #ffcc00;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .info-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .info-box h3 {
+            color: #2c5f2d;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #2c5f2d;
+            font-size: 18px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .store-info {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2c5f2d;
+        }
+        
+        .store-info h2 {
+            color: #1e3a28;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .store-details {
+            display: inline-flex;
+            gap: 30px;
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 14px;
+        }
+        
+        .items-table th {
+            background: #2c5f2d;
+            color: white;
+            padding: 12px 10px;
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        .items-table td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            text-align: right;
+        }
+        
+        .items-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .total-box {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #2c5f2d;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .total-label {
+            font-size: 20px;
+            color: #1e3a28;
+            font-weight: bold;
+        }
+        
+        .total-amount {
+            font-size: 32px;
+            font-weight: 900;
+            color: #2c5f2d;
+        }
+        
+        .actions {
+            text-align: center;
+            padding: 25px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .print-btn {
+            background: linear-gradient(to right, #2c5f2d, #1e3a28);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 95, 45, 0.4);
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 14px;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+        
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            
+            .print-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            
+            .actions, .instructions, .footer {
+                display: none !important;
+            }
+            
+            .print-btn {
+                display: none !important;
+            }
+            
+            @page {
+                margin: 0.5cm;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .print-container {
+                margin: 10px;
+            }
+            
+            .info-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .store-details {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .items-table {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-container">
+        <div class="header">
+            <h1 id="document-title">جاري التحميل...</h1>
+            <p id="document-subtitle">نظام المحاسبة المتكامل</p>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-box">
+                <h3>معلومات المستند</h3>
+                <p><strong>رقم:</strong> <span id="doc-number">#0000</span></p>
+                <p><strong>التاريخ:</strong> <span id="doc-date">جاري التحميل...</span></p>
+                <p><strong>النوع:</strong> <span id="doc-type">فاتورة</span></p>
+            </div>
+            
+            <div class="info-box">
+                <h3>معلومات العميل</h3>
+                <p><strong>الاسم:</strong> <span id="client-name">جاري التحميل...</span></p>
+                <p><strong>الهاتف:</strong> <span id="client-phone">جاري التحميل...</span></p>
+                <p><strong>الرصيد:</strong> <span id="client-balance">جاري التحميل...</span></p>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="store-info" id="store-info">
+                <!-- سيتم تعبئته من البيانات -->
+            </div>
+            
+            <div id="document-content">
+                <p style="text-align:center; padding:40px; color:#6c757d;">
+                    جاري تحميل محتوى المستند...
+                </p>
+            </div>
+            
+            <div class="total-box" id="total-box">
+                <!-- سيتم تعبئته من البيانات -->
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="print-btn" onclick="printNow()">
+                <span>🖨️</span>
+                طباعة هذا المستند
+            </button>
+            
+            <div class="instructions">
+                <p><strong>تعليمات الطباعة:</strong></p>
+                <p>1. اضغط زر "طباعة هذا المستند" أعلاه</p>
+                <p>2. أو استخدم <strong>Ctrl + P</strong> على الكمبيوتر</p>
+                <p>3. في الموبايل: ⋮ → مشاركة → طباعة</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>تم الإنشاء بواسطة نظام المحاسبة المتكامل</p>
+            <p>© 2025 - جميع الحقوق محفوظة</p>
+        </div>
+    </div>
+
+    <script>
+        // === دالة استقبال البيانات من الرابط ===
+        function getUrlData(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        // === تحميل وعرض البيانات ===
+        document.addEventListener('DOMContentLoaded', function() {
+            const type = getUrlData('type') || 'invoice';
+            const dataParam = getUrlData('data');
+            
+            if (dataParam) {
+                try {
+                    // فك تشفير البيانات
+                    const decodedData = decodeURIComponent(dataParam);
+                    const documentData = JSON.parse(decodedData);
+                    
+                    // عرض البيانات
+                    displayDocument(type, documentData);
+                    
+                    // محاولة الطباعة التلقائية
+                    setTimeout(() => {
+                        if (confirm('هل تريد الطباعة الآن؟')) {
+                            printNow();
+                        }
+                    }, 1500);
+                    
+                } catch (error) {
+                    showError('خطأ في تحميل البيانات: ' + error.message);
+                }
+            } else {
+                showError('لم يتم إرسال بيانات للطباعة');
+            }
+        });
+
+        // === عرض المستند حسب النوع ===
+        function displayDocument(type, data) {
+            // تحديث العنوان
+            const title = type === 'invoice' ? 'فاتورة بيع' : 'كشف حساب';
+            document.getElementById('document-title').textContent = title;
+            document.getElementById('document-subtitle').textContent = 
+                data.storeInfo?.name || 'نظام المحاسبة';
+            document.getElementById('doc-type').textContent = title;
+            
+            // عرض معلومات المحل
+            displayStoreInfo(data.storeInfo);
+            
+            // عرض المحتوى حسب النوع
+            if (type === 'invoice') {
+                displayInvoice(data);
+            } else if (type === 'statement') {
+                displayStatement(data);
+            }
+        }
+
+        // === عرض معلومات المحل ===
+        function displayStoreInfo(storeInfo) {
+            const storeDiv = document.getElementById('store-info');
+            
+            if (!storeInfo) {
+                storeDiv.innerHTML = '<h2>المحل التجاري</h2>';
+                return;
+            }
+            
+            let html = `<h2>${storeInfo.name || 'المحل التجاري'}</h2>`;
+            
+            if (storeInfo.desc) {
+                html += `<p style="color:#666; margin:5px 0;">${storeInfo.desc}</p>`;
+            }
+            
+            if (storeInfo.contact || storeInfo.address) {
+                html += `<div class="store-details">`;
+                
+                if (storeInfo.contact) {
+                    html += `<span>📞 ${storeInfo.contact}</span>`;
+                }
+                
+                if (storeInfo.address) {
+                    html += `<span>📍 ${storeInfo.address}</span>`;
+                }
+                
+                html += `</div>`;
+            }
+            
+            storeDiv.innerHTML = html;
+        }
+
+        // === عرض الفاتورة ===
+        function displayInvoice(data) {
+            // معلومات المستند
+            document.getElementById('doc-number').textContent = '#' + (data.id || '0001');
+            document.getElementById('doc-date').textContent = data.date || new Date().toLocaleDateString('ar-YE');
+            document.getElementById('client-name').textContent = data.customerName || 'زبون';
+            document.getElementById('client-phone').textContent = data.customerPhone || data.paymentMethod === 'cash' ? 'نقدي' : 'على الرصيد';
+            document.getElementById('client-balance').textContent = 
+                data.customerBalance ? data.customerBalance + ' ر.ي' : 'غير محدد';
+            
+            // جدول المنتجات
+            let tableHTML = '';
+            let total = 0;
+            
+            if (data.items && data.items.length > 0) {
+                tableHTML = `
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th width="5%">#</th>
+                                <th width="45%">المنتج</th>
+                                <th width="15%">الكمية</th>
+                                <th width="15%">السعر</th>
+                                <th width="20%">المجموع</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.items.forEach((item, index) => {
+                    const itemTotal = (item.price || 0) * (item.quantity || 1);
+                    total += itemTotal;
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name || 'منتج'}</td>
+                            <td>${item.quantity || 1}</td>
+                            <td>${(item.price || 0).toFixed(2)} ر.ي</td>
+                            <td>${itemTotal.toFixed(2)} ر.ي</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                tableHTML = '<p style="text-align:center; color:#666;">لا توجد عناصر</p>';
+            }
+            
+            document.getElementById('document-content').innerHTML = tableHTML;
+            
+            // المجموع الكلي
+            const finalTotal = data.total || total;
+            document.getElementById('total-box').innerHTML = `
+                <div class="total-label">المجموع الكلي</div>
+                <div class="total-amount">${finalTotal.toFixed(2)} ر.ي</div>
+            `;
+        }
+
+        // === عرض كشف الحساب ===
+        function displayStatement(data) {
+            // معلومات المستند
+            document.getElementById('doc-number').textContent = '#STA' + (data.id || '001');
+            document.getElementById('doc-date').textContent = data.date || new Date().toLocaleDateString('ar-YE');
+            document.getElementById('client-name').textContent = data.customerName || 'عميل';
+            document.getElementById('client-phone').textContent = data.customerPhone || 'غير محدد';
+            document.getElementById('client-balance').textContent = (data.currentBalance || 0) + ' ر.ي';
+            
+            // جدول المعاملات
+            let tableHTML = '';
+            
+            if (data.transactions && data.transactions.length > 0) {
+                tableHTML = `
+                    <h3 style="color:#1e3a28; margin-bottom:15px;">حركة الحساب</h3>
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th width="5%">#</th>
+                                <th width="20%">التاريخ</th>
+                                <th width="35%">الوصف</th>
+                                <th width="20%">المبلغ</th>
+                                <th width="20%">الرصيد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.transactions.forEach((trans, index) => {
+                    const amount = trans.amount || 0;
+                    const isDeposit = trans.type === 'deposit';
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${trans.date || '--'}</td>
+                            <td>${trans.description || (isDeposit ? 'إيداع' : 'سحب')}</td>
+                            <td style="color: ${isDeposit ? '#28a745' : '#dc3545'}; font-weight:bold;">
+                                ${isDeposit ? '+' : '-'} ${amount.toFixed(2)} ر.ي
+                            </td>
+                            <td>${(trans.balance || 0).toFixed(2)} ر.ي</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                tableHTML = '<p style="text-align:center; color:#666;">لا توجد معاملات</p>';
+            }
+            
+            document.getElementById('document-content').innerHTML = tableHTML;
+            
+            // الرصيد النهائي
+            const balance = data.currentBalance || 0;
+            const isPositive = balance >= 0;
+            
+            document.getElementById('total-box').innerHTML = `
+                <div class="total-label">الرصيد النهائي</div>
+                <div class="total-amount" style="color: ${isPositive ? '#28a745' : '#dc3545'}">
+                    ${isPositive ? '' : '-'} ${Math.abs(balance).toFixed(2)} ر.ي
+                </div>
+            `;
+        }
+
+        // === دالة الطباعة ===
+        function printNow() {
+            // إظهار رسالة
+            const msg = document.createElement('div');
+            msg.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #2c5f2d;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 10000;
+                text-align: center;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            `;
+            msg.innerHTML = '🖨️ جاري إعداد الطباعة...';
+            document.body.appendChild(msg);
+            
+            // الطباعة بعد ثانية
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => msg.remove(), 1000);
+            }, 1000);
+        }
+
+        // === دالة عرض الخطأ ===
+        function showError(message) {
+            document.getElementById('document-content').innerHTML = `
+                <div style="text-align:center; padding:50px;">
+                    <div style="color:#dc3545; font-size:48px; margin-bottom:20px;">⚠️</div>
+                    <h3 style="color:#dc3545;">خطأ</h3>
+                    <p style="color:#666; margin:15px 0;">${message}</p>
+                    <button onclick="window.history.back()" style="
+                        background: #2c5f2d;
+                        color: white;
+                        border: none;
+                        padding: 10px 25px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        margin-top: 10px;
+                    ">
+                        العودة
+                    </button>
+                </div>
+            `;
+            
+            document.querySelector('.actions').style.display = 'none';
+            document.getElementById('total-box').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
